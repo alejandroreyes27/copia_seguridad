@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>Usuarios</title>
+</head>
+<body>
+    <h1>Lista de Usuarios</h1>
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Paswword</th>
+            <th>Acciones</th>
+        </tr>
+        {% for user in data_user %}
+            <tr>
+                <td>{{ user.idUser }}</td>
+                <td>{{ user.nameUser }}</td>
+                <td>{{ user.passwordUser }}</td>
+                <td>
+                    <a href="{{ url_for('auth.edit', id=user.idUser) }}">Editar</a>
+                    {% if user.idUser != 1: %}
+                        <a href="{{ url_for('auth.delete', id=user.idUser) }}">Eliminar</a>
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+    <a href="{{ url_for('auth.add') }}">Agregar Usuario</a>
+    <br>
+    <a href="{{ url_for('productos.index') }}">Ir a lista de productos</a>
+
+</body>
+</html>
