@@ -123,6 +123,26 @@
         <span id="selected-total">$ 0</span>
       </div>
 
+      <!-- Modal -->
+      <div class="modal fade" id="invoicePreviewModal" tabindex="-1" aria-labelledby="invoicePreviewLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="invoicePreviewLabel">Vista Previa de la Factura</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="invoicePreviewContent">
+              <!-- Contenido dinámico aquí -->
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+              <button type="button" class="btn btn-success" id="downloadPdfBtn">Descargar PDF</button>
+            </div>
+          </div>
+        </div>
+      </div>
+  </div>
+
     {% else %}
       <p class="text-center emp ty-cart-message">Tu carrito está vacío 😢</p>
       <div class="text-center mt-4">
@@ -202,57 +222,100 @@
       checkbox.addEventListener('change', calcularTotalSeleccionado);
     });
 
-    //itemes seleccionados para la facturacion
+    // Nueva función para manejar la compra con modal
+    document.getElementById('btn-comprar').addEventListener('click', async function() {
+      const items = [];
+      document.querySelectorAll('tr[data-id]').forEach(row => {
+        const checkbox = row.querySelector('.select-product');
+        if (checkbox.checked) {
+          items.push({
+            product_id: row.getAttribute('data-id'),
+            cantidad: parseInt(row.querySelector('.quantity-input').value),
+            precio_unitario: parseFloat(row.getAttribute('data-precio')),
+            descripcion: row.querySelector('td:nth-child(3)').textContent.trim()
+          });
+        }
+      });
 
-    document.getElementById('btn-comprar').addEventListener('click', function() {
-    // Recopila la información del carrito; aquí se asume que cada fila tiene atributos data con la información necesaria.
-    const items = [];
-    document.querySelectorAll('tr[data-id]').forEach(row => {
-      const checkbox = row.querySelector('.select-product');
-      if (checkbox.checked) {
-        const product_id = row.getAttribute('data-id');
-        const cantidad = parseInt(row.querySelector('.quantity-input').value);
-        const precio_unitario = parseFloat(row.getAttribute('data-precio'));
-        // Puedes obtener o definir una descripción adicional si lo requieres.
-        items.push({
-          product_id: product_id,
-          cantidad: cantidad,
-          precio_unitario: precio_unitario,
-          descripcion: row.querySelector('td:nth-child(3)').textContent.trim()
+      if(items.length === 0) {
+        alert("Selecciona al menos un producto.");
+        return;
+      }
+
+      try {
+        const response = await fetch('{{ url_for("facturacion.comprar") }}', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ items: items })
         });
+
+        if (!response.ok) throw new Error("Error al procesar la compra.");
+
+        const data = await response.json(); // <- Aquí se parsea como JSON
+        const invoiceData = data.invoice_data;
+        const pdfBase64 = data.pdf_base64;
+
+        // Construir contenido del modal
+        const modalContent = `
+          <div class="invoice-preview">
+            <h3>Factura #${invoiceData.numero}</h3>
+            <p>Cliente: ${invoiceData.cliente}</p>
+            <p>Fecha: ${invoiceData.fecha}</p>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Descripción</th>
+                  <th>Cantidad</th>
+                  <th>Precio Unitario</th>
+                  <th>Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${invoiceData.items.map(item => `
+                  <tr>
+                    <td>${item.descripcion}</td>
+                    <td>${item.cantidad}</td>
+                    <td>$${item.precio_unitario.toLocaleString('de-DE')}</td>
+                    <td>$${(item.cantidad * item.precio_unitario).toLocaleString('de-DE')}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+            <div class="invoice-totals">
+              <p>Subtotal: $${invoiceData.subtotal.toLocaleString('de-DE')}</p>
+              <p>IVA (16%): $${invoiceData.iva.toLocaleString('de-DE')}</p>
+              <h4>Total: $${invoiceData.total.toLocaleString('de-DE')}</h4>
+            </div>
+          </div>
+        `;
+
+        // Mostrar el modal
+        document.getElementById('invoicePreviewContent').innerHTML = modalContent;
+        const myModal = new bootstrap.Modal(document.getElementById('invoicePreviewModal'));
+        myModal.show();
+
+        // Configurar descarga del PDF
+        document.getElementById('downloadPdfBtn').onclick = () => {
+          const byteCharacters = atob(pdfBase64);
+          const byteNumbers = new Array(byteCharacters.length);
+          for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+          }
+          const byteArray = new Uint8Array(byteNumbers);
+          const blob = new Blob([byteArray], { type: 'application/pdf' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'factura.pdf';
+          a.click();
+          URL.revokeObjectURL(url);
+        };
+
+      } catch (error) {
+        console.error("Error:", error);
+        alert("Ocurrió un error durante la compra.");
       }
     });
-
-    if(items.length === 0) {
-      alert("Por favor, selecciona al menos un producto para comprar.");
-      return;
-    }
-
-    // Realiza la petición POST a la ruta de facturación
-    fetch('{{ url_for("facturacion.comprar") }}', {
-      method: 'POST',
-      body: JSON.stringify({ items: items }),
-      headers: { 'Content-Type': 'application/json' }
-    })
-    .then(response => {
-      if(response.ok) return response.blob();
-      throw new Error("Error al procesar la compra.");
-    })
-    .then(blob => {
-      // Crea un objeto URL para descargar el PDF generado
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'factura.pdf';
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-    })
-    .catch(error => {
-      console.error("Error:", error);
-      alert("Ocurrió un error durante la compra.");
-    });
-  })
 
   </script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
