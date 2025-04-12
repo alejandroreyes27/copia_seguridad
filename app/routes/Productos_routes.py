@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash
 from app.models.Productos import Productos
 from flask_login import current_user
 from app.models.Categoria import Categoria 
+from flask_login import login_required
 from app import db
 import os
 from flask import current_app
@@ -10,11 +11,12 @@ from werkzeug.utils import secure_filename
 bp = Blueprint('productos', __name__)
 
 @bp.route('/productos')
+@login_required
 def index():
 
     edit_producto_id = request.args.get('edit')
     producto_edit = Productos.query.get(edit_producto_id) if edit_producto_id else None
-    
+
     data_producto = Productos.query.filter_by(activo=True).all()
     categorias = Categoria.query.all()
     
@@ -25,12 +27,14 @@ def index():
                            user=current_user)
 
 @bp.route('/productos_categoria/<int:id>', methods=['GET'])
+@login_required
 def index_categoria(id):
     data_producto = Productos.query.filter_by(idCategoria=id,activo=True).all()
     categorias = Categoria.query.all()
-    return render_template('productos/index.html', data_producto=data_producto, categorias=categorias, user=current_user,producto_edit=producto_edit)
+    return render_template('productos/index.html', data_producto=data_producto, categorias=categorias, user=current_user)
 
 @bp.route('/productos/add', methods=['GET', 'POST'])
+@login_required
 def add():
     if request.method == 'POST':
         try:
@@ -78,6 +82,7 @@ def add():
     return render_template('productos/add.html', categorias=categorias)
 
 @bp.route('/productos/edit/<int:id>', methods=['GET', 'POST'])
+@login_required
 def edit(id):
     producto = Productos.query.get_or_404(id)
 
@@ -130,6 +135,7 @@ def edit(id):
     return render_template('productos/edit.html', producto=producto, categorias=categorias)
 
 @bp.route('/productos/delete/<int:id>')
+@login_required
 def delete(id):
     producto = Productos.query.get_or_404(id)
 
