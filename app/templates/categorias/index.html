@@ -56,8 +56,8 @@
                         <td>{{ categoria.idCategoria }}</td>
                         <td>{{ categoria.nombreCategoria }}</td>
                         <td>
-                            <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editCategoryModal{{ categoria.idCategoria }}">Editar</button>
-                            <a href="{{ url_for('categoria.delete', id=categoria.idCategoria) }}" class="btn btn-danger btn-sm" onclick="return confirm('¿Eliminar esta categoría?')">Eliminar</a>
+                            <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editCategoryModal{{ categoria.idCategoria }}"><i class="material-icons">mode_edit</i></button>
+                            <a href="{{ url_for('categoria.delete', id=categoria.idCategoria) }}" class="btn btn-danger btn-sm" onclick="return confirm('¿Eliminar esta categoría?')"><i class="material-icons">delete</i></a>
                         </td>
                     </tr>
                     
