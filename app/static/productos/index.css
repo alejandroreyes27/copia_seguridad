@@ -1,12 +1,4 @@
 /* ===============================
-   ESTILOS GENERALES DEL BODY
-   =============================== */
-   body {
-    font-family: Arial, sans-serif; /* Fuente principal del sitio */
-    background-color: #f4f4f4; /* Color de fondo claro */
-}
-
-/* ===============================
    GRID DE PRODUCTOS
    =============================== */
 .product-grid {
