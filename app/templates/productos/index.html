@@ -108,7 +108,7 @@
                     <!-- Acciones para administradores -->
                     <div class="admin-actions">
                         {% if current_user.rolUser == 'administrador': %}
-                            <a href="{{ url_for('productos.edit', id=producto.idProducto) }}"><i class="material-icons">mode_edit</i></a>
+                            <a href="{{ url_for('productos.index', edit=producto.idProducto) }}"><i class="material-icons me-1">edit</i></a>
                             <a href="{{ url_for('productos.delete', id=producto.idProducto) }}" onclick="return confirm('¿Seguro?');"><i class="material-icons">delete</i></a>
                         {% endif %}
                     </div>
@@ -199,6 +199,91 @@
             </div>
             </div>
         </div>
+
+        <!-- Modal de Edición (se mostrará automáticamente si hay producto_edit) -->
+        {% if producto_edit %}
+        <div class="modal fade show" id="editProductModal" tabindex="-1" 
+            aria-labelledby="editProductModalLabel" aria-hidden="true" 
+            style="display: block; overflow-y: auto;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+            <form method="POST" action="{{ url_for('productos.edit', id=producto_edit.idProducto) }}" 
+                    enctype="multipart/form-data">
+                <div class="modal-header">
+                <h5 class="modal-title" id="editProductModalLabel">Editar Producto</h5>
+                <a href="{{ url_for('productos.index') }}" class="btn-close"></a>
+                </div>
+                <div class="modal-body">
+                <!-- Nombre -->
+                <div class="mb-3">
+                    <label class="form-label">Nombre</label>
+                    <input type="text" class="form-control" name="nombreProducto" 
+                        value="{{ producto_edit.nombreProducto }}" required>
+                </div>
+
+                <!-- Descripción -->
+                <div class="mb-3">
+                    <label class="form-label">Descripción</label>
+                    <textarea class="form-control" name="descripcionProducto" rows="3" required>{{ producto_edit.descripcionProducto }}</textarea>
+                </div>
+
+                <!-- Precio -->
+                <div class="mb-3">
+                    <label class="form-label">Precio</label>
+                    <input type="number" class="form-control" name="precioProducto" step="0.01" 
+                        value="{{ producto_edit.precioProducto }}" required>
+                </div>
+
+                <!-- Stock -->
+                <div class="mb-3">
+                    <label class="form-label">Stock</label>
+                    <input type="number" class="form-control" name="stock" 
+                        value="{{ producto_edit.stock }}" required>
+                </div>
+
+                <!-- Categoría -->
+                <div class="mb-3">
+                    <label class="form-label">Categoría</label>
+                    <select class="form-select" name="categoria" required>
+                    <option value="">Selecciona una categoría</option>
+                    {% for cat in categorias %}
+                        <option value="{{ cat.idCategoria }}" 
+                                {% if cat.idCategoria == producto_edit.idCategoria %}selected{% endif %}>
+                        {{ cat.nombreCategoria }}
+                        </option>
+                    {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Imagen actual -->
+                <div class="mb-3">
+                    <label class="form-label">Imagen Actual</label>
+                    <div>
+                    {% if producto_edit.imagenProducto %}
+                        <img src="{{ url_for('static', filename=producto_edit.imagenProducto) }}" 
+                            alt="Imagen actual" class="img-thumbnail" style="max-width: 150px;">
+                    {% else %}
+                        <p class="text-muted">No hay imagen cargada</p>
+                    {% endif %}
+                    </div>
+                </div>
+
+                <!-- Nueva imagen -->
+                <div class="mb-3">
+                    <label class="form-label">Nueva Imagen</label>
+                    <input type="file" class="form-control" name="imagenProducto">
+                </div>
+                </div>
+                <div class="modal-footer">
+                <a href="{{ url_for('productos.index') }}" class="btn btn-secondary">Cancelar</a>
+                <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                </div>
+            </form>
+            </div>
+        </div>
+        </div>
+        <div class="modal-backdrop fade show"></div>
+        {% endif %}
 
     <!-- Footer -->
     <div class="footer">

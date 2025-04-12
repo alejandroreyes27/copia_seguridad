@@ -11,15 +11,24 @@ bp = Blueprint('productos', __name__)
 
 @bp.route('/productos')
 def index():
+
+    edit_producto_id = request.args.get('edit')
+    producto_edit = Productos.query.get(edit_producto_id) if edit_producto_id else None
+    
     data_producto = Productos.query.filter_by(activo=True).all()
     categorias = Categoria.query.all()
-    return render_template('productos/index.html', data_producto=data_producto, categorias=categorias, user=current_user)
+    
+    return render_template('productos/index.html', 
+                           data_producto=data_producto, 
+                           categorias=categorias,
+                           producto_edit=producto_edit,
+                           user=current_user)
 
 @bp.route('/productos_categoria/<int:id>', methods=['GET'])
 def index_categoria(id):
     data_producto = Productos.query.filter_by(idCategoria=id,activo=True).all()
     categorias = Categoria.query.all()
-    return render_template('productos/index.html', data_producto=data_producto, categorias=categorias, user=current_user)
+    return render_template('productos/index.html', data_producto=data_producto, categorias=categorias, user=current_user,producto_edit=producto_edit)
 
 @bp.route('/productos/add', methods=['GET', 'POST'])
 def add():
@@ -114,7 +123,7 @@ def edit(id):
         except Exception as e:
             db.session.rollback()
             flash(f'Error al actualizar el producto: {str(e)}', 'error')
-            return redirect(url_for('productos.edit', id=id))
+            return redirect(url_for('productos.index', edit=id))
 
     # Obtener todas las categorías para mostrar en el formulario
     categorias = Categoria.query.all()
