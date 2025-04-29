@@ -3,9 +3,12 @@ FROM python:3.13-alpine
 WORKDIR /app
 
 RUN apk add --no-cache \
-    build-base \
-    python3-dev \
-    curl-dev
+      build-base \        # gcc, make, libc-dev…  
+      python3-dev \       # cabeceras de Python  
+      curl-dev \          # curl-config y libcurl-dev  
+      qt5-qtbase-dev \    # qmake-qt5 y cabeceras de Qt5 :contentReference[oaicite:0]{index=0}  
+      qt5-qttools-dev &&  # utilidades Qt (opcional pero recomendable) :contentReference[oaicite:1]{index=1} \
+    ln -sf /usr/bin/qmake-qt5 /usr/bin/qmake
 # Copiar requirements.txt e instalar dependencias
 COPY requirements.txt .
 RUN pip install --default-timeout=100 --no-cache-dir -r requirements.txt
