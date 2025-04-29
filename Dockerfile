@@ -3,10 +3,9 @@ FROM python:3.13-alpine
 WORKDIR /app
 
 RUN apk add --no-cache \
-      build-base \    # gcc, make, libc-dev…
-      python3-dev \   # cabeceras de Python para extensiones C
-      curl-dev        # curl-config y cabeceras de libcurl
-      
+    build-base \
+    python3-dev \
+    curl-dev
 # Copiar requirements.txt e instalar dependencias
 COPY requirements.txt .
 RUN pip install --default-timeout=100 --no-cache-dir -r requirements.txt
