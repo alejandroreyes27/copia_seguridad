@@ -2,12 +2,11 @@ FROM python:3.13-alpine
 # Establecer el directorio de trabajo
 WORKDIR /app
 
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-        build-essential \
-        python3-dev \
-        libcurl4-openssl-dev && \
-    rm -rf /var/lib/apt/lists/*
+RUN apk add --no-cache \
+      build-base \    # gcc, make, libc-dev…
+      python3-dev \   # cabeceras de Python para extensiones C
+      curl-dev        # curl-config y cabeceras de libcurl
+      
 # Copiar requirements.txt e instalar dependencias
 COPY requirements.txt .
 RUN pip install --default-timeout=100 --no-cache-dir -r requirements.txt
