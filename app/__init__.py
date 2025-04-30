@@ -9,7 +9,6 @@ login_manager = LoginManager()
 
 def create_app():
     app = Flask(__name__)
-    app.config['SECRET_KEY'] = os.urandom(24)
     app.config.from_object('config.Config')  # Cargar configuración desde config.py
 
     # Inicializar las extensiones
