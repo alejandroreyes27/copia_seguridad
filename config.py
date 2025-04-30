@@ -7,5 +7,5 @@ class Config:
     SECRET_KEY = secrets.token_urlsafe(24)
 
 #Comandos para descargar en instalar todas las librerias offline  
-#python -m pip download -r requirements.txt -d librerias
+#python ñ
 #pip install --no-index --find-links=librerias -r requirements.txt

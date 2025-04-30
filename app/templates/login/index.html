@@ -90,24 +90,6 @@
                                 <i class="material-icons">shopping_cart</i>
                             </a>
                         </li>
-                        {% if current_user.rolUser == 'administrador': %}
-                        <button type="button" class="btn btn-primary d-inline-flex align-items-center" data-bs-toggle="modal" data-bs-target="#addProductModal">
-                            <i class="material-icons me-1">add_circle_outline</i>
-                            <span>Producto</span>
-                        </button>
-                        {% endif %}
-                        <!-- Filtro de Categorías -->
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle text-white" href="#" id="categoryDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                Categoría
-                            </a>
-                            <ul class="dropdown-menu" aria-labelledby="categoryDropdown">
-                                <li><a class="dropdown-item" href="{{ url_for('productos.index') }}" data-categoria="">Todas las categorías</a></li>
-                                {% for categoria in categorias %}
-                                    <li><a class="dropdown-item" href="{{ url_for('productos.index_categoria', id=categoria.idCategoria) }}" data-categoria="{{ categoria.idCategoria }}">{{ categoria.nombreCategoria }}</a></li>
-                                {% endfor %}
-                            </ul>
-                        </li>
                     </ul>
                     <!-- Usuario y Cerrar Sesión -->
                     <span class="navbar-text text-white"> {{ current_user.nameUser }}</span>
